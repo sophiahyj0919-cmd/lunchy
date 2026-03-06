@@ -29,6 +29,8 @@ THEME_MAP = {
     '든든한 한끼 🍱': ['정식', '백반', '도시락', '비빔밥', '덮밥', '볶음밥'],
     '고기 먹고 싶다 🥩': ['삼겹', '갈비', '목살', '차돌', '직화', '소고기', '한우', '구이', '불고기'],
     '면 생각날 때 🍝': ['냉면', '우동', '라멘', '짬뽕', '짜장', '파스타', '탄탄면', '막국수', '쫄면', '소바'],
+    '가벼운 한끼 🥗': ['샐러드', '샌드위치', '소바', '냉소바', '쌀국수', '김밥', '누들', '막국수', '오니기리'],
+    '카페 ☕': ['에스프레소', '아메리카노', '카페라떼', '라떼', '마리또조', '크로아상', '커피', '아포가토', '콜드브루'],
 }
 
 
@@ -39,7 +41,8 @@ def detect_cuisine(text):
 
 def detect_themes(text, avg):
     themes = [t for t, kws in THEME_MAP.items() if any(k in text for k in kws)]
-    if avg and avg < 10000:
+    is_cafe = '카페 ☕' in themes
+    if avg and avg < 10000 and not is_cafe:
         themes.append('가성비 👍')
     return themes
 
