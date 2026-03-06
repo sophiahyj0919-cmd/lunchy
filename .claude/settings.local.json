@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show flask)",
+      "Bash(python -c \":*)",
+      "Bash(taskkill /f /im python.exe)"
+    ]
+  }
+}

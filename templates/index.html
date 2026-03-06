@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘 뭐 먹지? 🍽️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FFF8F0;
+      --primary: #FF6B6B;
+      --primary-dark: #E55A5A;
+      --secondary: #4ECDC4;
+      --yellow: #FFD166;
+      --purple: #C77DFF;
+      --text: #2C2C2C;
+      --muted: #999;
+      --card: #fff;
+      --border: #F0E6D8;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF9B53 100%);
+      color: white;
+      padding: 24px 24px 0;
+      text-align: center;
+    }
+    .header-title {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    .header-sub {
+      font-size: 14px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    /* ── Random Section ── */
+    .random-section {
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF9B53 100%);
+      padding: 20px 24px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .random-label {
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      opacity: 0.95;
+    }
+
+    .random-quick-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .qf-chip {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.45);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+    }
+    .qf-chip:hover, .qf-chip.active {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+    }
+
+    .random-card-wrap {
+      width: 100%;
+      max-width: 460px;
+    }
+    .random-card {
+      background: white;
+      border-radius: 22px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+      min-height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .random-placeholder {
+      text-align: center;
+      color: #ccc;
+    }
+    .random-placeholder .big-emoji {
+      font-size: 52px;
+      margin-bottom: 10px;
+    }
+    .random-placeholder p {
+      font-size: 15px;
+    }
+
+    .random-result {
+      width: 100%;
+    }
+    .random-result .r-emoji {
+      font-size: 44px;
+      text-align: center;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .random-result .r-name {
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .random-result .r-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .random-result .r-menus-preview {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    .random-result .r-price {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .random-result .go-btn {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, #FF6B6B, #FF9B53);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .random-result .go-btn:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .pick-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      border-radius: 50px;
+      padding: 15px 44px;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: -0.3px;
+    }
+    .pick-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+    }
+    .pick-btn:active { transform: scale(0.97); }
+    .pick-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ── Filter Section ── */
+    .filter-section {
+      background: white;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0 14px;
+      margin-bottom: 12px;
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 11px 8px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+    }
+    .search-icon { font-size: 17px; color: var(--muted); }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .filter-row:last-child { margin-bottom: 0; }
+    .filter-row::-webkit-scrollbar { display: none; }
+
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 48px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .chip {
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s;
+      font-family: inherit;
+      background: white;
+      color: var(--text);
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* ── Cards Section ── */
+    .cards-section {
+      padding: 20px 20px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .cards-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .cards-count {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Restaurant Card ── */
+    .r-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1.5px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .r-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--accent-color, var(--primary));
+    }
+    .r-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 36px rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.05);
+    }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .card-emoji { font-size: 28px; flex-shrink: 0; }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+      flex: 1;
+    }
+    .card-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    /* Badge styles */
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-한식  { background: #FFF0E6; color: #D45E1A; }
+    .badge-중식  { background: #FFE6F0; color: #B5174E; }
+    .badge-일식  { background: #E6F0FF; color: #1053C4; }
+    .badge-양식  { background: #E6F5EA; color: #1E7A34; }
+    .badge-기타  { background: #F0F0F0; color: #666; }
+    .badge-theme { background: #F0EDFF; color: #6B48BF; }
+
+    .card-menus {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .card-menus span + span::before {
+      content: ' · ';
+      color: #ddd;
+    }
+    .card-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* ── Empty / Loading ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+    .empty-emoji { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px) scale(0.96); opacity: 0; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-close {
+      position: sticky;
+      top: 14px;
+      float: right;
+      margin: 14px 14px 0 0;
+      background: #F5F5F5;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      z-index: 1;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+    .modal-close:hover { background: #E5E5E5; }
+
+    .modal-header { padding: 20px 24px 0; clear: both; }
+    .modal-c-emoji { font-size: 40px; margin-bottom: 8px; }
+    .modal-name {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .modal-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .modal-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .modal-info-item {
+      font-size: 14px;
+      color: #555;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      line-height: 1.5;
+    }
+    .info-icon { flex-shrink: 0; font-size: 15px; }
+
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 24px;
+    }
+    .modal-body { padding: 20px 24px 28px; }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    /* Menu list */
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 24px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .m-name { font-weight: 500; }
+    .m-price {
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+      margin-left: 12px;
+    }
+
+    /* Comments */
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .comment-item {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .comment-author {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .comment-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .comment-at { font-size: 11px; color: var(--muted); }
+    .comment-content { font-size: 14px; color: #444; line-height: 1.55; }
+
+    .no-comments {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Comment form */
+    .comment-form {
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .comment-form input,
+    .comment-form textarea {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .comment-form input:focus,
+    .comment-form textarea:focus { border-color: var(--primary); }
+    .comment-form textarea { resize: none; height: 72px; }
+    .comment-submit {
+      background: linear-gradient(135deg, #FF6B6B, #FF9B53);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .comment-submit:hover { opacity: 0.88; }
+    .comment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Animations */
+    @keyframes popIn {
+      0%   { transform: scale(0.82); opacity: 0; }
+      65%  { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @media (max-width: 600px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .modal { border-radius: 20px 20px 0 0; max-height: 95vh; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-title">🍽️ 오늘 뭐 먹지?</div>
+  <div class="header-sub">역삼역 점심 메뉴 고민 해결사</div>
+</header>
+
+<!-- Random Picker -->
+<section class="random-section">
+  <div class="random-label">✨ 오늘의 메뉴 뽑기</div>
+  <div class="random-quick-filters" id="random-filters">
+    <button class="qf-chip active" data-val="">전체</button>
+    <button class="qf-chip" data-val="한식">🍚 한식</button>
+    <button class="qf-chip" data-val="중식">🥢 중식</button>
+    <button class="qf-chip" data-val="일식">🍱 일식</button>
+    <button class="qf-chip" data-val="양식">🍝 양식</button>
+  </div>
+  <div class="random-card-wrap">
+    <div class="random-card" id="random-card">
+      <div class="random-placeholder">
+        <div class="big-emoji">🎲</div>
+        <p>버튼을 눌러서 오늘의 메뉴를 뽑아보세요!</p>
+      </div>
+    </div>
+  </div>
+  <button class="pick-btn" id="pick-btn" onclick="pickRandom()">오늘은 이거다! 🎲</button>
+</section>
+
+<!-- Filters -->
+<div class="filter-section">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="식당 이름으로 검색..." oninput="applyFilters()">
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">종류</span>
+    <button class="chip active" data-g="cuisine" data-val="" onclick="setCuisine('')">전체</button>
+    <button class="chip" data-g="cuisine" data-val="한식" onclick="setCuisine('한식')">🍚 한식</button>
+    <button class="chip" data-g="cuisine" data-val="중식" onclick="setCuisine('중식')">🥢 중식</button>
+    <button class="chip" data-g="cuisine" data-val="일식" onclick="setCuisine('일식')">🍱 일식</button>
+    <button class="chip" data-g="cuisine" data-val="양식" onclick="setCuisine('양식')">🍝 양식</button>
+    <button class="chip" data-g="cuisine" data-val="기타" onclick="setCuisine('기타')">🍽️ 기타</button>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">테마</span>
+    <button class="chip active" data-g="theme" data-val="" onclick="setTheme('')">전체</button>
+    <button class="chip" data-g="theme" data-val="해장용 🍜" onclick="setTheme('해장용 🍜')">해장용 🍜</button>
+    <button class="chip" data-g="theme" data-val="든든한 한끼 🍱" onclick="setTheme('든든한 한끼 🍱')">든든한 한끼 🍱</button>
+    <button class="chip" data-g="theme" data-val="고기 먹고 싶다 🥩" onclick="setTheme('고기 먹고 싶다 🥩')">고기 먹고 싶다 🥩</button>
+    <button class="chip" data-g="theme" data-val="면 생각날 때 🍝" onclick="setTheme('면 생각날 때 🍝')">면 생각날 때 🍝</button>
+    <button class="chip" data-g="theme" data-val="가성비 👍" onclick="setTheme('가성비 👍')">가성비 👍</button>
+  </div>
+</div>
+
+<!-- Cards Grid -->
+<section class="cards-section">
+  <div class="cards-meta">
+    <div class="cards-count" id="cards-count"></div>
+  </div>
+  <div class="cards-grid" id="cards-grid">
+    <div class="empty-state">
+      <div class="empty-emoji">🍽️</div>
+      <p>식당 정보를 불러오는 중...</p>
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="onOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <div class="modal-c-emoji" id="modal-emoji"></div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-badges" id="modal-badges"></div>
+      <div class="modal-info" id="modal-info"></div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">
+      <div class="section-title">📋 메뉴</div>
+      <div class="menu-list" id="modal-menus"></div>
+
+      <div class="section-title">💬 한 줄 소감</div>
+      <div class="comments-list" id="comments-list"></div>
+      <div class="comment-form">
+        <input type="text" id="c-author" placeholder="닉네임 (최대 20자)" maxlength="20">
+        <textarea id="c-content" placeholder="오늘 점심 어땠나요? 한 줄 소감 남겨보기 ✍️ (최대 100자)" maxlength="100"></textarea>
+        <button class="comment-submit" id="c-submit" onclick="submitComment()">소감 남기기 ✍️</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CUISINE_EMOJI  = { '한식':'🍚', '중식':'🥢', '일식':'🍱', '양식':'🍝', '기타':'🍽️' };
+  const CUISINE_ACCENT = { '한식':'#FF8C42', '중식':'#FF5C8D', '일식':'#5B8FF9', '양식':'#5AD8A6', '기타':'#B8B8B8' };
+  const AVATAR_COLORS  = ['#FF6B6B','#4ECDC4','#FFD166','#C77DFF','#FF9B53','#5B8FF9'];
+
+  let allRestaurants = [];
+  let filteredRestaurants = [];
+  let selectedCuisine = '';
+  let selectedTheme   = '';
+  let randomCuisine   = '';
+  let currentRestaurant = null;
+
+  /* ── Utility ── */
+  function fmt(p) { return p ? p.toLocaleString('ko-KR') + '원' : ''; }
+  function priceRange(r) {
+    if (!r.min_price && !r.max_price) return '가격 정보 없음';
+    if (r.min_price === r.max_price)  return fmt(r.min_price);
+    return fmt(r.min_price) + ' ~ ' + fmt(r.max_price);
+  }
+  function cuisineEmoji(r) { return CUISINE_EMOJI[r.cuisines[0]] || '🍽️'; }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function badgesHTML(r) {
+    const cb = r.cuisines.map(c => `<span class="badge badge-${c}">${c}</span>`).join('');
+    const tb = r.themes.slice(0,2).map(t => `<span class="badge badge-theme">${t}</span>`).join('');
+    return cb + tb;
+  }
+
+  /* ── Render Cards ── */
+  function cardHTML(r) {
+    const accent  = CUISINE_ACCENT[r.cuisines[0]] || '#FF6B6B';
+    const emoji   = cuisineEmoji(r);
+    const preview = r.menu_items.slice(0,3).map(m => `<span>${escHtml(m.name)}</span>`).join('');
+    return `
+      <div class="r-card" style="--accent-color:${accent}" onclick="openModal(${r.id})">
+        <div class="card-top">
+          <span class="card-emoji">${emoji}</span>
+          <span class="card-name">${escHtml(r.name)}</span>
+        </div>
+        <div class="card-badges">${badgesHTML(r)}</div>
+        ${preview ? `<div class="card-menus">${preview}</div>` : ''}
+        <div class="card-price">${priceRange(r)}</div>
+      </div>`;
+  }
+
+  function renderCards() {
+    const grid  = document.getElementById('cards-grid');
+    const count = document.getElementById('cards-count');
+    if (!filteredRestaurants.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-emoji">😅</div><p>해당 조건의 식당이 없어요!</p></div>`;
+      count.textContent = '';
+      return;
+    }
+    count.textContent = `총 ${filteredRestaurants.length}개 식당`;
+    grid.innerHTML = filteredRestaurants.map(cardHTML).join('');
+  }
+
+  /* ── Filters ── */
+  function applyFilters() {
+    const q = document.getElementById('search-input').value.trim();
+    filteredRestaurants = allRestaurants.filter(r =>
+      (!selectedCuisine || r.cuisines.includes(selectedCuisine)) &&
+      (!selectedTheme   || r.themes.includes(selectedTheme)) &&
+      (!q               || r.name.includes(q))
+    );
+    renderCards();
+  }
+
+  function setCuisine(val) {
+    selectedCuisine = val;
+    document.querySelectorAll('[data-g="cuisine"]').forEach(c =>
+      c.classList.toggle('active', c.dataset.val === val));
+    applyFilters();
+  }
+
+  function setTheme(val) {
+    selectedTheme = val;
+    document.querySelectorAll('[data-g="theme"]').forEach(c =>
+      c.classList.toggle('active', c.dataset.val === val));
+    applyFilters();
+  }
+
+  /* ── Random Picker ── */
+  function setRandomCuisine(val) {
+    randomCuisine = val;
+    document.querySelectorAll('#random-filters .qf-chip').forEach(c =>
+      c.classList.toggle('active', c.dataset.val === val));
+  }
+
+  async function pickRandom() {
+    const btn = document.getElementById('pick-btn');
+    btn.disabled = true;
+    btn.textContent = '고르는 중... 🎰';
+    try {
+      const p = new URLSearchParams();
+      if (randomCuisine) p.set('cuisine', randomCuisine);
+      const r = await fetch('/api/random?' + p).then(r => r.json());
+      showRandomResult(r);
+      btn.textContent = '다시 뽑기! 🎲';
+    } catch(e) {
+      btn.textContent = '오늘은 이거다! 🎲';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function showRandomResult(r) {
+    const card    = document.getElementById('random-card');
+    const emoji   = cuisineEmoji(r);
+    const preview = r.menu_items.slice(0,3).map(m => escHtml(m.name)).join(' · ') || '-';
+    card.innerHTML = `
+      <div class="random-result pop-in">
+        <span class="r-emoji">${emoji}</span>
+        <div class="r-name">${escHtml(r.name)}</div>
+        <div class="r-badges">${badgesHTML(r)}</div>
+        <div class="r-menus-preview">${preview}</div>
+        <div class="r-price">${priceRange(r)}</div>
+        <button class="go-btn" onclick="openModal(${r.id})">자세히 보기 →</button>
+      </div>`;
+  }
+
+  /* ── Modal ── */
+  function openModal(id) {
+    const r = allRestaurants.find(x => x.id === id);
+    if (!r) return;
+    currentRestaurant = r;
+
+    document.getElementById('modal-emoji').textContent = cuisineEmoji(r);
+    document.getElementById('modal-name').textContent  = r.name;
+    document.getElementById('modal-badges').innerHTML  = badgesHTML(r);
+
+    let info = '';
+    if (r.address)   info += `<div class="modal-info-item"><span class="info-icon">📍</span><span>${escHtml(r.address)}</span></div>`;
+    if (r.open_time) info += `<div class="modal-info-item"><span class="info-icon">🕐</span><span>${escHtml(r.open_time)}</span></div>`;
+    document.getElementById('modal-info').innerHTML = info;
+
+    const menus = document.getElementById('modal-menus');
+    if (!r.menu_items.length) {
+      menus.innerHTML = '<div class="no-comments">메뉴 정보가 없어요 😅</div>';
+    } else {
+      menus.innerHTML = r.menu_items.map(m => `
+        <div class="menu-item">
+          <span class="m-name">${escHtml(m.name)}</span>
+          ${m.price ? `<span class="m-price">${m.price.toLocaleString('ko-KR')}원</span>` : ''}
+        </div>`).join('');
+    }
+
+    loadComments(r.name);
+    document.getElementById('c-author').value  = '';
+    document.getElementById('c-content').value = '';
+    document.getElementById('modal-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+    currentRestaurant = null;
+  }
+
+  function onOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  /* ── Comments ── */
+  async function loadComments(name) {
+    const list = document.getElementById('comments-list');
+    list.innerHTML = '<div class="no-comments" style="opacity:0.5">불러오는 중...</div>';
+    try {
+      const comments = await fetch('/api/comments?name=' + encodeURIComponent(name)).then(r => r.json());
+      if (!comments.length) {
+        list.innerHTML = '<div class="no-comments">첫 번째 소감을 남겨보세요! 🌟</div>';
+        return;
+      }
+      list.innerHTML = comments.map(c => {
+        const color = AVATAR_COLORS[c.author.charCodeAt(0) % AVATAR_COLORS.length];
+        return `
+          <div class="comment-item">
+            <div class="comment-header">
+              <div class="comment-author">
+                <div class="comment-avatar" style="background:${color}">${c.author.charAt(0)}</div>
+                ${escHtml(c.author)}
+              </div>
+              <div class="comment-at">${c.at}</div>
+            </div>
+            <div class="comment-content">${escHtml(c.content)}</div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div class="no-comments">불러오기 실패 😅</div>';
+    }
+  }
+
+  async function submitComment() {
+    if (!currentRestaurant) return;
+    const author  = document.getElementById('c-author').value.trim() || '익명';
+    const content = document.getElementById('c-content').value.trim();
+    if (!content) { alert('소감을 입력해주세요!'); return; }
+
+    const btn = document.getElementById('c-submit');
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    try {
+      await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurant_name: currentRestaurant.name, author, content }),
+      });
+      document.getElementById('c-author').value  = '';
+      document.getElementById('c-content').value = '';
+      await loadComments(currentRestaurant.name);
+    } catch(e) {
+      alert('저장에 실패했어요 😅');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '소감 남기기 ✍️';
+    }
+  }
+
+  /* ── Random filter chips setup ── */
+  document.querySelectorAll('#random-filters .qf-chip').forEach(chip => {
+    chip.addEventListener('click', () => setRandomCuisine(chip.dataset.val));
+  });
+
+  /* ── Init ── */
+  (async () => {
+    try {
+      allRestaurants = await fetch('/api/restaurants').then(r => r.json());
+      filteredRestaurants = allRestaurants;
+      renderCards();
+    } catch(e) {
+      document.getElementById('cards-grid').innerHTML =
+        '<div class="empty-state"><div class="empty-emoji">😵</div><p>데이터를 불러오지 못했어요</p></div>';
+    }
+  })();
+</script>
+</body>
+</html>
